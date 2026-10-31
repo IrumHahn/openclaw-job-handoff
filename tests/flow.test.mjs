@@ -151,6 +151,8 @@ test('full handoff: start → manual → cases → talkback → replay → repor
     const record = fs.readFileSync(path.join(dir, 'record.md'), 'utf8');
     assert.match(record, /L0\(\d{4}-\d{2}-\d{2}\), L1/);
     assert.match(record, /❌/);
+    assert.match(record, /\| \[되말하기\] 다시 이해한 순서 \|/);
+    assert.doesNotMatch(record, /되말하기 · \[되말하기\]/);
     assert.match(fs.readFileSync(path.join(t.main, 'jobs', 'INDEX.md'), 'utf8'), /ad-log-2 \| jae/);
 
     // 안내 구역 빼기: 내가 쓴 규칙은 남는다

@@ -121,7 +121,8 @@ export function renderRecord(state) {
   const rows = [...state.events].reverse().map(e => {
     if (e.kind === 'level' || e.kind === 'job' || e.kind === 'boundary') return `| ${e.at} | ${e.kind === 'level' ? '승급' : e.kind === 'job' ? '설명서' : '묻기 규칙'} | ${e.note || ''} |  |`
     const label = KIND_LABEL[e.kind] || e.kind
-    return `| ${e.date || e.at} | ${label} · ${e.title || e.ref} | ${e.note || ''} | ${e.grade ? GRADE_EMOJI[e.grade] : '채점 전'} |`
+    const title = e.title || e.ref
+    return `| ${e.date || e.at} | ${title.startsWith('[') ? title : `${label} · ${title}`} | ${e.note || ''} | ${e.grade ? GRADE_EMOJI[e.grade] : '채점 전'} |`
   })
   const head = [
     `# 채점표 — ${state.title}`,

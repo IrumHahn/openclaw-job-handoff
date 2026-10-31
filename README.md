@@ -44,7 +44,7 @@ cd ~
 git clone https://github.com/IrumHahn/openclaw-job-handoff.git
 openclaw skills install ./openclaw-job-handoff/skill/job-handoff --as job-handoff --agent main
 openclaw skills install ./openclaw-job-handoff/skill/job-handoff --as job-handoff --agent <팀원 id>   # 수습시킬 팀원마다
-openclaw skills list | grep job-handoff
+openclaw skills list --agent main | grep job-handoff                                     # 직원이 여럿이면 --agent 가 필요해요
 ```
 
 그다음 총괄에게: **"<팀원>에게 <업무> 업무 인수인계 시작해 줘."**
