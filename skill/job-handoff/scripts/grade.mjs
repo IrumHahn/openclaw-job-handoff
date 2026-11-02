@@ -28,7 +28,7 @@ function apply({ main, ledger, jobId, rid, grade, note, gradedAt, now }) {
   Object.assign(event, { grade, note: cleanNote, gradedAt, gradedOn: kstDate(now) });
   saveState(entry, state);
   const acked = ack(ledger, reportSourceId(jobId, rid), gradedAt);
-  if (acked) publishCard(ledger, entry, state);
+  publishCard(ledger, entry, state, now);
   const check = eligibility(state);
   return {
     job: jobId, title: state.title, ref: rid, kind: event.kind, grade, emoji: GRADE_EMOJI[grade], note: cleanNote, repeated: same,

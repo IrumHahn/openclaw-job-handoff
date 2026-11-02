@@ -1,7 +1,7 @@
 // 대시보드(openclaw-personal-dashboard v0.5) 「수습」 메뉴와의 연결.
 //   보내기: dashboard-builder 의 수습 장부(<dashboard>/ojt.json)에 업무 카드·보고를 올린다 → build_dashboard + send_to_pc 가 PC 로 보낸다.
 //   받기  : PC 가 쓴 grades.json(또는 Hub 출력의 표시 줄 사이 base64)을 읽는다 → 채점 반영 → 장부의 gradeAck 로 "반영됨"을 돌려준다.
-// 장부 모양은 dashboard-builder/scripts/ojt.mjs 와 같다: { version:1, jobs:[{id,title,agent,level,lesson,summary}], reports:[{sourceId,job,agent,title,body,date,gradeAck}] }
+// 장부 모양은 dashboard-builder/scripts/ojt.mjs 와 같다: { version:1, jobs:[{id,title,agent,level,lesson,summary,metrics}], reports:[{sourceId,job,agent,title,body,date,gradeAck}] }
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -34,7 +34,7 @@ export function upsertJobCard(file, card) {
   if (!file) return false;
   const ledger = load(file);
   const existing = ledger.jobs.find(j => j.id === card.id);
-  const next = { id: card.id, title: card.title, agent: card.agent, level: card.level, lesson: card.lesson || '', summary: card.summary || '' };
+  const next = { id: card.id, title: card.title, agent: card.agent, level: card.level, lesson: card.lesson || '', summary: card.summary || '', metrics: card.metrics || '' };
   if (existing) Object.assign(existing, next); else ledger.jobs.push(next);
   writeJson(file, ledger);
   return true;

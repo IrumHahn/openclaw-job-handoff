@@ -223,3 +223,58 @@ test('baseline: 직접 할 때 시간을 저장하고, 바꿀 땐 확인하고, 
     assert.equal(t.run('baseline', ['--id', 'ad-log-2', '--dashboard', 'none']).out.baseline.minutes, 30);
   } finally { t.cleanup(); }
 });
+
+test('metrics: 실제 보고만 주별로 세고, 아낀 시간은 추정으로, 성적표와 대시보드 장부에 나간다', () => {
+  const t = setup();
+  try {
+    const common = ['--dashboard', t.ledger];
+    fs.mkdirSync(path.dirname(t.ledger), { recursive: true });
+    t.run('start', ['--id', 'ad-log', '--title', '쿠팡 광고 일지', '--agent', 'ana', '--team', t.team, ...common]);
+
+    // 채점이 하나도 없으면 성적표는 조용하다.
+    assert.equal(t.run('metrics', ['--weekly', '--now', '2026-11-08T21:50:00+09:00', ...common]).out.message, '');
+
+    const report = (title, date, grade, kind = 'report') => {
+      const body = t.file(`${title}.md`, `${title} 본문`);
+      const rid = t.run('report', ['--id', 'ad-log', '--title', title, '--body-file', body, '--kind', kind, '--date', date, ...common]).out.rid;
+      t.run('grade', ['--id', 'ad-log', '--ref', rid, '--grade', grade, ...(grade === 'good' ? [] : ['--note', '고칠 점']), '--now', `${date}T20:00:00+09:00`, ...common]);
+    };
+    // 지난주(11/2~11/8): 👍1 ✏️2 ❌1, 되말하기는 연습이라 세지 않는다.
+    report('되말하기', '2026-11-03', 'good', 'talkback');
+    report('1', '2026-11-03', 'good');
+    report('2', '2026-11-04', 'fix');
+    report('3', '2026-11-05', 'fix');
+    report('4', '2026-11-08', 'bad');
+    // 이번 주(11/9~): 👍2 ✏️1
+    report('5', '2026-11-09', 'good');
+    report('6', '2026-11-10', 'good');
+    report('7', '2026-11-11', 'fix');
+
+    const now = '2026-11-15T21:50:00+09:00';
+    const noBase = t.run('metrics', ['--id', 'ad-log', '--now', now, ...common]).out.jobs[0];
+    assert.equal(noBase.weeks.at(-1).savedMinutes, null);
+    t.run('baseline', ['--id', 'ad-log', '--minutes', '30', ...common]);
+
+    const { jobs, message } = t.run('metrics', ['--weekly', '--now', now, ...common]).out;
+    const [last, current] = jobs[0].weeks;
+    assert.deepEqual(last, { week: '2026-11-02', done: 4, good: 1, fix: 2, bad: 1, goodRate: 25, savedMinutes: 90 - (1 + 10 + 10) });
+    assert.deepEqual(current, { week: '2026-11-09', done: 3, good: 2, fix: 1, bad: 0, goodRate: 67, savedMinutes: 90 - (2 + 5) });
+    assert.match(message, /쿠팡 광고 일지/);
+    assert.match(message, /처리 3건/);
+    assert.match(message, /내가 고친 횟수 1번 \(지난주 3번\)/);
+    assert.match(message, /그대로 쓴 비율 67% \(지난주 25%\)/);
+    assert.match(message, /아낀 시간 약 1시간 23분 \(추정\)/);
+
+    const card = JSON.parse(fs.readFileSync(t.ledger, 'utf8')).jobs[0];
+    assert.equal(JSON.parse(card.metrics).baselineMinutes, 30);
+    assert.equal(JSON.parse(card.metrics).weeks.at(-1).done, 3);
+
+    // 채점이 없는 주도 빈칸으로 남겨 추세가 왜곡되지 않게 하고, 이번 주가 비면 그렇게 말한다.
+    const later = t.run('metrics', ['--weekly', '--now', '2026-11-29T21:50:00+09:00', ...common]).out;
+    assert.deepEqual(later.jobs[0].weeks.map(w => w.done), [4, 3, 0, 0]);
+    assert.match(later.message, /이번 주는 채점한 보고가 없어요/);
+
+    // 검토 시간이 더 걸린 주를 아낀 것처럼 말하지 않는다.
+    assert.doesNotMatch(later.message, /약 -/);
+  } finally { t.cleanup(); }
+});

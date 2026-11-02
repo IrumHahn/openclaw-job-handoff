@@ -1,4 +1,5 @@
 // 스크립트들이 같이 쓰는 준비 단계: 총괄 폴더 → 색인 → 업무 → 상태, 그리고 대시보드 업무 카드 갱신.
+import { computeMetrics } from './metrics.mjs';
 import path from 'node:path';
 import { requireAbs } from './args.mjs';
 import { ledgerPath, upsertJobCard } from './dashboard.mjs';
@@ -21,8 +22,8 @@ export function summaryOf(entry) {
   return section.split('\n').slice(1).map(s => s.trim()).find(Boolean)?.slice(0, 200) || '';
 }
 
-export function publishCard(ledger, entry, state) {
-  return upsertJobCard(ledger, { id: state.id, title: state.title, agent: state.agent, level: state.graduated ? 'L4' : state.level, lesson: lastLesson(entry), summary: summaryOf(entry) });
+export function publishCard(ledger, entry, state, now = new Date()) {
+  return upsertJobCard(ledger, { id: state.id, title: state.title, agent: state.agent, level: state.graduated ? 'L4' : state.level, lesson: lastLesson(entry), summary: summaryOf(entry), metrics: JSON.stringify(computeMetrics(state, now)) });
 }
 
 // 단계가 바뀌면 색인(INDEX.md)에도 적는다.
