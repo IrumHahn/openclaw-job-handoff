@@ -1,6 +1,6 @@
 ---
 name: job-handoff
-description: "수습 기간 · 업무 인수인계. 주인의 업무 1개를 AI 직원에게 넘긴다: 총괄이 7문항 인터뷰로 업무 설명서(job.md)를 만들고, 지난 사례 3개를 받아 판단 이유를 되묻고, 담당 직원이 되말하기(헷갈리는 곳 2개)를 하고, 매일 보고를 주인이 👍 ✏️ ❌ 로 채점하면 설명서를 고친다. 채점표로 L0 견습 → L1 따라하기 → L2 같이 하기 → L3 혼자 하기 → L4 가르치기 승급. Use on '○○에게 △△ 업무 인수인계 시작해', '수습', '인수인계', '업무 설명서', '되말하기', '재현 시험', '수습 현황 보여 줘', '대시보드 채점 가져와', '[채점] … (id report:…)', '승급시켜 줘', '먼저 묻지 말고 해도 돼', or when a job's report is graded. Never edit job.md, boundary.md, lessons.md, record.md directly — only through this skill's scripts after the owner approves."
+description: "수습 기간 · 업무 인수인계. 주인의 업무 1개를 AI 직원에게 넘긴다: 총괄이 7문항 인터뷰로 업무 설명서(job.md)를 만들고, 지난 사례 3개를 받아 판단 이유를 되묻고, 담당 직원이 되말하기(헷갈리는 곳 2개)를 하고, 매일 보고를 주인이 👍 ✏️ ❌ 로 채점하면 설명서를 고친다. 채점표로 L0 견습 → L1 따라하기 → L2 같이 하기 → L3 혼자 하기 → L4 가르치기 승급. Use on '○○에게 △△ 업무 인수인계 시작해', '○○에게 △△ 업무 가르쳐 줘', '△△ 일을 ○○에게 맡기고 싶어', '△△ 업무 넘기고 싶어', '수습', '인수인계', '업무 설명서', '되말하기', '재현 시험', '수습 현황 보여 줘', '대시보드 채점 가져와', '[채점] … (id report:…)', '승급시켜 줘', '먼저 묻지 말고 해도 돼', or when a job's report is graded. Not for a one-off request like '이거 해 줘'. Never edit job.md, boundary.md, lessons.md, record.md directly — only through this skill's scripts after the owner approves."
 ---
 
 # 수습 기간 (job-handoff)
