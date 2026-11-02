@@ -184,3 +184,42 @@ test('safety: secrets are masked, long manuals warn, missing sections warn, no d
     assert.equal(mainAgents.split('job-handoff-hook:start').length, 2);
   } finally { t.cleanup(); }
 });
+
+test('baseline: 직접 할 때 시간을 저장하고, 바꿀 땐 확인하고, 현황·채점표·둘째 직원에 이어진다', () => {
+  const t = setup();
+  try {
+    const common = ['--team', t.team, '--dashboard', 'none'];
+    t.run('start', ['--id', 'ad-log', '--title', '쿠팡 광고 일지', '--agent', 'ana', ...common]);
+
+    const empty = t.run('status', ['--id', 'ad-log', '--dashboard', 'none']).out;
+    assert.equal(empty.jobs[0].baseline, null);
+    assert.match(empty.message, /기준 시간 없음/);
+    assert.equal(t.run('baseline', ['--id', 'ad-log', '--dashboard', 'none']).out.baseline, null);
+
+    for (const bad of ['0', '-5', '1.5', 'abc', '1441']) {
+      assert.equal(t.run('baseline', ['--id', 'ad-log', '--minutes', bad, '--dashboard', 'none'], { ok: false }).status, 2, bad);
+    }
+
+    const saved = t.run('baseline', ['--id', 'ad-log', '--minutes', '40', '--note', '엑셀 합계까지', '--now', '2026-11-07T10:00:00+09:00', '--dashboard', 'none']).out;
+    assert.equal(saved.baseline.minutes, 40);
+    assert.equal(saved.baseline.recordedOn, '2026-11-07');
+    assert.match(saved.message, /40분/);
+
+    const record = fs.readFileSync(path.join(t.ana, 'jobs', 'ad-log', 'record.md'), 'utf8');
+    assert.match(record, /기준 시간: 직접 하면 40분/);
+    assert.match(t.run('status', ['--id', 'ad-log', '--dashboard', 'none']).out.message, /직접 하면 40분/);
+
+    // 같은 값은 그대로, 다른 값은 확인 없이 덮어쓰지 않는다(비교 기준이 흔들리지 않게).
+    assert.equal(t.run('baseline', ['--id', 'ad-log', '--minutes', '40', '--dashboard', 'none']).out.changed, false);
+    assert.equal(t.run('baseline', ['--id', 'ad-log', '--minutes', '30', '--dashboard', 'none'], { ok: false }).status, 2);
+    const replaced = t.run('baseline', ['--id', 'ad-log', '--minutes', '30', '--replace', '--dashboard', 'none']).out;
+    assert.equal(replaced.baseline.minutes, 30);
+    assert.match(fs.readFileSync(path.join(t.ana, 'jobs', 'ad-log', 'record.md'), 'utf8'), /40분 → 30분/);
+
+    // 기준 시간 기록은 승급 계산에 끼어들지 않는다.
+    assert.match(t.run('level', ['--id', 'ad-log', 'check', '--dashboard', 'none']).out.progress, /되말하기/);
+
+    t.run('start', ['--id', 'ad-log-2', '--title', '쿠팡 광고 일지(둘째)', '--agent', 'jae', '--copy-from', 'ad-log', ...common]);
+    assert.equal(t.run('baseline', ['--id', 'ad-log-2', '--dashboard', 'none']).out.baseline.minutes, 30);
+  } finally { t.cleanup(); }
+});

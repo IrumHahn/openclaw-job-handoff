@@ -20,10 +20,10 @@ runMain(() => {
       level: state.graduated ? '수료' : state.level, levelName: state.graduated ? '' : LEVEL_NAMES[state.level],
       progress: check.progress, eligible: check.eligible,
       ungraded: state.events.filter(e => e.ref && !e.grade).map(e => ({ ref: e.ref, title: e.title, date: e.date })),
-      lesson: lastLesson(entry), jobVersion: state.jobVersion,
+      lesson: lastLesson(entry), jobVersion: state.jobVersion, baseline: state.baseline ?? null,
     };
   });
-  const lines = jobs.map(j => `• ${j.title} — ${j.agent}, ${j.level}${j.levelName ? ` ${j.levelName}` : ''} (${j.progress})${j.ungraded.length ? `, 채점 기다리는 것 ${j.ungraded.length}건` : ''}${j.eligible ? ', 승급 조건 충족!' : ''}`);
+  const lines = jobs.map(j => `• ${j.title} — ${j.agent}, ${j.level}${j.levelName ? ` ${j.levelName}` : ''} (${j.progress})${j.ungraded.length ? `, 채점 기다리는 것 ${j.ungraded.length}건` : ''}${j.eligible ? ', 승급 조건 충족!' : ''}${j.baseline ? `, 직접 하면 ${j.baseline.minutes}분` : ', 기준 시간 없음'}`);
   return {
     jobs,
     message: jobs.length ? `수습 현황이에요.\n${lines.join('\n')}` : '아직 수습 중인 업무가 없어요. "○○에게 △△ 업무 인수인계 시작해"라고 말해 주세요.',

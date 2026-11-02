@@ -40,6 +40,10 @@ node <skill-dir>/scripts/start.mjs --main <main> --id ad-log --title "쿠팡 광
 node <skill-dir>/scripts/job.mjs --main <main> --id ad-log --file /tmp/ad-log-job.md --reason "인터뷰"
 ```
 `warnings` 가 있으면 주인에게 쉬운 말로 알린다(빠진 질문은 다시 묻고, 1,500자가 넘으면 "예시는 사례로 옮길까요?").
+5) **기준 시간을 묻는다.** "이 일을 대표님이 직접 하시면 1건에 몇 분쯤 걸리나요? 어림이면 돼요." 일을 맡기기 전 값이라 나중에는 되살릴 수 없다. 묻는 법은 interview.md 끝. 주인이 답한 값만 저장한다.
+```bash
+node <skill-dir>/scripts/baseline.mjs --main <main> --id ad-log --minutes 40 --note "엑셀 합계까지"
+```
 
 ## 2. 사례 받기 (총괄)
 
@@ -133,7 +137,7 @@ node <skill-dir>/scripts/start.mjs --main <main> --id ad-log-2 --title "쿠팡 �
 
 | exit | 뜻 | 주인에게 |
 |---|---|---|
-| 2 | 이유가 필요함(✏️❌ 한 줄 / 사례 판단 이유 / 승인 없음) | 출력 `error` 의 앞 문장(쉬운 말)을 그대로 묻는다 |
+| 2 | 이유·확인이 필요함(✏️❌ 한 줄 / 사례 판단 이유 / 승인 없음 / 기준 시간 값·변경 확인) | 출력 `error` 의 앞 문장(쉬운 말)을 그대로 묻는다 |
 | 3 | 승급 조건이 아직 안 됨 | "아직 ○○이 남았어요" + `level.mjs check` 의 진행 |
 | 4 | AGENTS.md 안내 구역이 망가짐 | "업무 규칙 파일의 수습 안내 부분이 깨져 있어서 손대지 않았어요. 확인해 주세요" |
 | 1 | 그 밖 | "수습 기록 중에 문제가 생겨서 이번 건은 처리하지 못했어요" 한 줄. 오류문은 내 작업 기록에만 |

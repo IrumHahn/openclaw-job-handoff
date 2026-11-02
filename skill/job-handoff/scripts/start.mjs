@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs, requireAbs } from './lib/args.mjs';
 import { COMMON, publishCard } from './lib/context.mjs';
-import { createJobFolder, findJob, jobDir, loadIndex, newState, saveIndex, saveState } from './lib/job.mjs';
+import { createJobFolder, findJob, jobDir, loadIndex, loadState, newState, saveIndex, saveState } from './lib/job.mjs';
 import { refreshHooks } from './lib/hook.mjs';
 import { ledgerPath } from './lib/dashboard.mjs';
 import { findAgent, loadTeam } from './lib/team.mjs';
@@ -38,6 +38,8 @@ runMain(() => {
     createJobFolder(entry, state, { job: readText(path.join(from, 'job.md')), boundary: readText(path.join(from, 'boundary.md')) });
     for (const name of fs.existsSync(path.join(from, 'cases')) ? fs.readdirSync(path.join(from, 'cases')) : []) fs.copyFileSync(path.join(from, 'cases', name), path.join(jobDir(entry), 'cases', name));
     state.jobVersion = 1;
+    const { baseline } = loadState(source);
+    if (baseline) state.baseline = baseline;
     state.events.push({ at: entry.createdAt, kind: 'job', note: `'${source.title}'(${source.agent}) 설명서로 시작` });
     saveState(entry, state);
   } else createJobFolder(entry, state);
@@ -51,10 +53,10 @@ runMain(() => {
     copiedFrom: copied,
     hooks,
     dashboard,
-    next: copied ? '담당 직원에게 설명서를 읽고 되말하기(3절)를 시키세요' : '인터뷰 7문항을 한 번에 하나씩 물어보세요(references/interview.md) → job.mjs 로 설명서 첫 판 저장',
+    next: copied ? '담당 직원에게 설명서를 읽고 되말하기(3절)를 시키세요' : '인터뷰 7문항을 한 번에 하나씩 물어보세요(references/interview.md) → job.mjs 로 설명서 첫 판 저장 → 기준 시간을 물어 baseline.mjs 로 저장',
     message: copied
       ? `'${title}' 인수인계를 시작했어요. ${agent.id}에게 기존 설명서를 넘겼으니, 읽고 이해한 내용을 되말하게 할게요.`
-      : `'${title}' 인수인계를 시작했어요. 담당은 ${agent.id}예요. 이제 일곱 가지를 하나씩 여쭤볼게요. 편하게 말로 답해 주세요.`,
+      : `'${title}' 인수인계를 시작했어요. 담당은 ${agent.id}예요. 이제 일곱 가지를 하나씩 여쭤보고, 마지막에 걸리는 시간도 하나 여쭤볼게요. 편하게 말로 답해 주세요.`,
   };
 });
 

@@ -5,7 +5,7 @@
 //   record.md    채점표 (state.json 에서 그려 낸다 — 손으로 고치지 않는다)
 //   boundary.md  묻기 규칙 (먼저 묻기 / 하고 나서 보고 / 절대 하지 않기)
 //   reports/     보고 원문
-//   state.json   기계가 읽는 원본 (단계·사건·보고 목록)
+//   state.json   기계가 읽는 원본 (단계·사건·보고 목록·기준 시간)
 // 총괄 작업 폴더의 jobs/index.json 이 "어떤 업무가 누구 폴더에 있나"를 기억한다.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -119,7 +119,7 @@ export function lastLesson(entry) {
 export function renderRecord(state) {
   const check = eligibility(state)
   const rows = [...state.events].reverse().map(e => {
-    if (e.kind === 'level' || e.kind === 'job' || e.kind === 'boundary') return `| ${e.at} | ${e.kind === 'level' ? '승급' : e.kind === 'job' ? '설명서' : '묻기 규칙'} | ${e.note || ''} |  |`
+    if (e.kind === 'level' || e.kind === 'job' || e.kind === 'boundary' || e.kind === 'baseline') return `| ${e.at} | ${{ level: '승급', job: '설명서', boundary: '묻기 규칙', baseline: '기준 시간' }[e.kind]} | ${e.note || ''} |  |`
     const label = KIND_LABEL[e.kind] || e.kind
     const title = e.title || e.ref
     return `| ${e.date || e.at} | ${title.startsWith('[') ? title : `${label} · ${title}`} | ${e.note || ''} | ${e.grade ? GRADE_EMOJI[e.grade] : '채점 전'} |`
@@ -135,6 +135,7 @@ export function renderRecord(state) {
     `- 진행: ${check.progress}${check.eligible ? ' → 승급 조건 충족' : ''}`,
     `- 통과한 단계: ${state.passed.map(p => `${p.level}(${p.at})`).join(', ') || '없음'}`,
     `- 설명서 판: v${state.jobVersion}`,
+    `- 기준 시간: ${state.baseline ? `직접 하면 ${state.baseline.minutes}분 (주인 어림)` : '아직 없음'}`,
     '',
     '| 날짜 | 무엇 | 한 줄 | 채점 |',
     '|---|---|---|---|',
